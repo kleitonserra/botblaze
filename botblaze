@@ -1,0 +1,162 @@
+import time
+from importlib import reload
+from pickle import NONE
+from sqlite3 import Time
+
+import telebot
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from time import sleep
+
+
+# Por informações do seu bot.
+api_key = '5413429353:AAGjXeBZMrEEqfu64UpRkspSj_y3L0JHxis'
+user_id = '1853936349'  # CHAT CANAL
+
+bot = telebot.TeleBot(token=api_key)
+
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+nav = webdriver.Chrome(options = chrome_options)
+nav.get('https://blaze.com/pt/games/double')
+sleep(3)
+timmer = 0
+while timmer < 1:
+    blaze_girou = nav.find_element(By.XPATH, '//*[@id="roulette-timer"]/div[1]').text
+    if blaze_girou.split()[0:1] == 'Blaze':
+        print("Analizando...")
+        timmer = 1
+    girando = nav.find_element(By.XPATH, '//*[@id="roulette-timer"]/div[1]').text
+    if girando == 'Girando...':
+        print("Analizando...")
+        sleep(10)
+        timmer = 1
+
+entradap = '''
+⚠️SINAL ENCONTRADO⚠️
+
+🔔 Entrar no PRETO ⚫ AGORA! 🔔
+⚔️ Entrar após o ⚫
+⚠️ Aplicar no Máximo 1 Gale
+⚪️ Proteção no ⚪ [opcional]
+
+💻 ACESSE AQUI  ♦️ Blaze Duble ♦️
+(https://blaze.com/pt/games/double)
+        '''
+print(list(entradap))
+entradav = '''
+⚠️SINAL ENCONTRADO⚠️
+
+🔔 Entrar no VERMELHO🔴 AGORA! 🔔
+⚔️ Entrar após o 🔴
+🛡️ Proteção no ⚪ [opcional]
+
+💻 ACESSE AQUI  ♦️ Blaze Duble ♦️
+(https://blaze.com/pt/games/double)
+'''
+print(list(entradav))
+
+
+
+def qualnum(x):
+    return int(x)
+
+
+def qualcor(x):
+    if qualnum(x) <= 7:
+        return 'V'
+    if qualnum(x) > 7:
+        return 'P'
+        ##ESTRATEGIAS##
+
+
+def sequencia(padrao):
+    if padrao[0:6] == ['V', 'V', 'V', 'P', 'P', 'P']:
+        return entradap
+    if padrao[0:6] == ['P', 'P', 'P', 'V', 'V', 'V']:
+        return entradav
+    if padrao[0:6] == ['P', 'P', 'P', 'P', 'P', 'P']:
+        return entradap
+
+    if padrao[0:6] == ['V', 'V', 'V', 'V', 'V', 'V']:
+        return entradav
+
+    if padrao[0:6] == ['P', 'P', 'V', 'V', 'V', 'V']:
+        return entradap
+
+    if padrao[0:6] == ['V', 'V', 'P', 'P', 'P', 'P']:
+        return entradav
+
+    if padrao[0:3] == ['P', 'V', 'V']:
+        return entradav
+
+    if padrao[0:2] == ['V', 'V']:
+        return entradav
+
+    if padrao[0:3] == ['P', 'V', 'V']:
+        return entradap
+
+    if padrao[0:3] == ['V', 'P', 'V']:
+        return entradav
+
+    if padrao[0:3] == ['V', 'V', 'V']:
+        return entradav
+
+    if padrao[0:3] == ['V', 'V', 'V']:
+        return entradap
+
+    if padrao[0:4] == ['P', 'V', 'P']:
+        return entradav
+
+    if padrao[0:4] == ['V', 'P', 'V']:
+        return entradav
+
+    if padrao[0:8] == ['V', 'V', 'P', 'P']:
+        return entradav
+
+    if padrao[0:8] == ['P', 'P', 'V', 'V']:
+        return entradap
+
+    else:
+        return """A A A A A A A A A A A A A A A A A A A A A A A A A"""
+
+
+def WinOrLoss(msg):
+    sleep(10)
+    pegarrusltado = nav.find_element(By.XPATH, '//*[@id="roulette-recent"]').text
+    WL = pegarrusltado.split()[0]
+    wlcor = qualcor(WL)
+    print('O resultado é:', wlcor)
+
+    if msg == 'NENHUMA':
+        return
+    if msg == wlcor:
+        
+        bot.send_message(chat_id=user_id, text='''  "✅PAGAAAA✅ "
+        ''')
+
+
+    else:
+        
+        bot.send_message(chat_id=user_id, text=''' "❌ Tomou loss no double? Logo recuperamos! "
+        ''')
+
+
+while True:
+    sleep(5)
+    pegardados = nav.find_element(By.XPATH, '//*[@id="roulette-recent"]').text
+
+    dados = pegardados.split()
+
+    formato = dados[0:8]
+    mapnum = map(qualnum, formato)
+    mapcor = map(qualcor, formato)
+    organizadonum = list(mapnum)
+    organizadocor = list(mapcor)
+    padrao = sequencia(organizadocor)
+    print("Entrada Confirmada:", list(padrao)[35])
+    if list(padrao)[35] == 'P' or list(padrao)[35] == 'V':
+        bot.send_message(user_id, padrao)
+        sleep(15)
+        resultadocor = WinOrLoss(list(padrao)[35])
